@@ -4,6 +4,7 @@ namespace Yangze\ModulesHelper;
 
 use Yangze\ModulesHelper\Console\Providers\ConsoleServiceProvider;
 use Yangze\ModulesHelper\Console\Providers\GeneratorServiceProvider;
+use Illuminate\Support\ServiceProvider;
 
 class ModulesHelperServiceProvider extends ServiceProvider 
 {
