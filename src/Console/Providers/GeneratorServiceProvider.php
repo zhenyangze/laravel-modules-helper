@@ -1,0 +1,34 @@
+<?php
+
+namespace Yangze\ModulesHelper\Console\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class GeneratorServiceProvider extends ServiceProvider
+{
+    /**
+     * Bootstrap the application services.
+     */
+    public function boot()
+    {
+        $this->register();
+    }
+
+    /**
+     * Register the application services.
+     */
+    public function register()
+    {
+        $generators = [
+            'command.make.module.resource' => \Yangze\ModulesHelper\Console\Generators\MakeResourceCommand::class,
+        ];
+
+        foreach ($generators as $slug => $class) {
+            $this->app->singleton($slug, function ($app) use ($slug, $class) {
+                return $app[$class];
+            });
+
+            $this->commands($slug);
+        }
+    }
+}
