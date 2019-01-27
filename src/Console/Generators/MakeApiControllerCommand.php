@@ -4,31 +4,31 @@ namespace Yangze\ModulesHelper\Console\Generators;
 
 use Caffeinated\Modules\Console\GeneratorCommand;
 
-class MakeResourceCommand extends GeneratorCommand
+class MakeApiControllerCommand extends GeneratorCommand
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'make:module:helper:resource
+    protected $signature = 'make:module:helper:controller:
     	{slug : The slug of the module}
     	{name : The name of the resource class}
-    	{--collection : Generate a module resource class}';
+    	{--model : Generate a module resource class}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new module resource class';
+    protected $description = 'Create a new module Controller class';
 
     /**
      * String to store the command type.
      *
      * @var string
      */
-    protected $type = 'Module Resource';
+    protected $type = 'Module Controller';
 
     /**
      * Get the stub file for the generator.
@@ -37,11 +37,11 @@ class MakeResourceCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        if ($this->option('collection')) {
-            return __DIR__.'/stubs/resource-collection.stub';
-        }
+        //if ($this->option('collection')) {
+            //return __DIR__.'/stubs/controller-api.stub';
+        //}
 
-        return __DIR__.'/stubs/resource.stub';
+        return __DIR__.'/stubs/controller-api.stub';
     }
 
     /**
@@ -53,6 +53,6 @@ class MakeResourceCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return module_class($this->argument('slug'), 'Http\\Resources');
+        return module_class($this->argument('slug'), 'Http\\Controller');
     }
 }
