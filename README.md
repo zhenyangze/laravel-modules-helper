@@ -1,5 +1,4 @@
 # laravel modules helper
------
 this is a package for creating restful api with `Caffeinated Modules`, the first version is aim to ***create restful api*** in modules.
 
 ## Quick Installation
@@ -36,16 +35,19 @@ php artisan make:module Common
 ```php
 php artisan make:module:helper:controller common Api/CommonNewsController --model App\\Models\\CommonNews --resource --request
 ```
+
 3. add route to the `api.php`
 in my website is app/Modules/Common/Routes/api.php,you should choose the right module.
 ```php
 Route::resource('common/news', 'Api\CommonNewsController');
 ```
+
 4. test the restful api
+
 | method | url |
-|--------|--------|
-|     get   |     api/common/news   |
-|     post   |     api/common/news   |
-|     get   |     api/common/news/1   |
-|     patch   |     api/common/news/1   |
-|    delete    |     api/common/news/1   |
+|:--------|:--------|
+|     get   |    api/common/news   |
+|     post  |    api/common/news   |
+|     get   |    api/common/news/1   |
+|     patch |    api/common/news/1   |
+|    delete |    api/common/news/1   |
