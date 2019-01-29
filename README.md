@@ -31,12 +31,14 @@ php artisan make:module Common
 ```
 
 2. create restfull api
-==before you create the api, you shoule make sure the model is exists.==
+
+before you create the api, you shoule make sure the model is exists.
 ```php
 php artisan make:module:helper:controller common Api/CommonNewsController --model App\\Models\\CommonNews --resource --request
 ```
 
 3. add route to the `api.php`
+
 in my website is app/Modules/Common/Routes/api.php,you should choose the right module.
 ```php
 Route::resource('common/news', 'Api\CommonNewsController');
