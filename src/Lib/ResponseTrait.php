@@ -24,7 +24,12 @@ trait ResponseTrait{
         $jsonData[$codeKey] = $code;
         $jsonData[$messageKey] = $message;
         $jsonData[$dataKey] = $data;
-        
+
+        $callback = request()->get('callback');
+        if (!empty($callback)) {
+            return response(($callback . "('" . json_encode($jsonData) . "')"));
+        }
+
         return response()->json($jsonData);
     }
 
