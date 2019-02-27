@@ -24,12 +24,11 @@ trait ResponseTrait{
         $jsonData[$codeKey] = $code;
         $jsonData[$messageKey] = $message;
         $jsonData[$dataKey] = $data;
-
         $callback = request()->get('callback');
         if (!empty($callback)) {
             return response(($callback . "('" . json_encode($jsonData) . "')"));
         }
-
+        
         return response()->json($jsonData);
     }
 
@@ -42,9 +41,9 @@ trait ResponseTrait{
      *
      * @return 
      */
-    public function sendSuccess($data = [], $message = 'success', $code = 2000)
+    public function sendSuccess($data = [], $message = 'success', $code = 0)
     {
-        return $this->sendResponse($data, $message, $code);
+        return $this->sendResponse($data, $message, $this->getCode($code, 'success', 200));
     }
 
     /**
@@ -56,9 +55,9 @@ trait ResponseTrait{
      *
      * @return 
      */
-    public function sendError($message = 'error', $data = [], $code = 4000)
+    public function sendError($message = 'error', $data = [], $code = 0)
     {
-        return $this->sendResponse($data, $message, $code);
+        return $this->sendResponse($data, $message, $this->getCode($code, 'error', 500));
     }
 
     /**
@@ -69,9 +68,9 @@ trait ResponseTrait{
      *
      * @return 
      */
-    public function sendNotFound($message = 'not found', $code = 4000)
+    public function sendNotFound($message = 'not found', $code = 0)
     {
-        return $this->sendResponse([], $message, $code);
+        return $this->sendResponse([], $message, $this->getCode($code, 'not found', 404));
     }
 
     /**
@@ -82,9 +81,26 @@ trait ResponseTrait{
      *
      * @return 
      */
-    public function sendNoAuth($message = 'no auth', $code = 5000)
+    public function sendNoAuth($message = 'no auth', $code = 0)
     {
-        return $this->sendResponse([], $message, $code);
+        return $this->sendResponse([], $message, $this->getCode($code, 'unauthorized', 401));
     }
 
+    /**
+     * getCode 
+     *
+     * @param $code
+     * @param $type
+     * @param $default
+     *
+     * @return 
+     */
+    protected function getCode($code = null, $type = 'error', $default = 500)
+    {
+        if (empty($code)) {
+            $code = array_get(config('modules_helper.http_code'), $type, $default);
+        }
+
+        return $code;
+    }
 }
