@@ -14,6 +14,16 @@ class HttpCode
     private $config = [];
 
     /**
+     * __construct 
+     *
+     * @return 
+     */
+    public function __construct()
+    {
+        $this->config = config('modules_helper.http_code');
+    }
+
+    /**
      * code
      *
      * @param $identify
