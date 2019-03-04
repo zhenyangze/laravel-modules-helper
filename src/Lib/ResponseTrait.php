@@ -41,7 +41,7 @@ trait ResponseTrait{
      *
      * @return 
      */
-    public function sendSuccess($data = [], $message = 'success', $code = 0)
+    public function sendSuccess($data = [], $message = 'success', $code = 200)
     {
         return $this->sendResponse($data, $message, $this->getCode($code, 'success', 200));
     }
@@ -55,7 +55,7 @@ trait ResponseTrait{
      *
      * @return 
      */
-    public function sendError($message = 'error', $data = [], $code = 0)
+    public function sendError($message = 'error', $data = [], $code = 500)
     {
         return $this->sendResponse($data, $message, $this->getCode($code, 'error', 500));
     }
@@ -68,7 +68,7 @@ trait ResponseTrait{
      *
      * @return 
      */
-    public function sendNotFound($message = 'not found', $code = 0)
+    public function sendNotFound($message = 'not found', $code = 404)
     {
         return $this->sendResponse([], $message, $this->getCode($code, 'not found', 404));
     }
@@ -81,7 +81,7 @@ trait ResponseTrait{
      *
      * @return 
      */
-    public function sendNoAuth($message = 'no auth', $code = 0)
+    public function sendNoAuth($message = 'no auth', $code = 401)
     {
         return $this->sendResponse([], $message, $this->getCode($code, 'unauthorized', 401));
     }
@@ -102,5 +102,18 @@ trait ResponseTrait{
         }
 
         return $code;
+    }
+
+    /**
+     * sendFailValidate 
+     *
+     * @param $message
+     * @param $code
+     *
+     * @return 
+     */
+    public function sendFailValidate($message = 'fail validate', $code = 422)
+    {
+        return $this->sendResponse([], $message, $this->getCode($code, 'fail validate', 422));
     }
 }
