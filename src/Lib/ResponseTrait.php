@@ -25,11 +25,68 @@ trait ResponseTrait{
         $jsonData[$messageKey] = $message;
         $jsonData[$dataKey] = $data;
         $callback = request()->get('callback');
+        $dataType = request()->get('format_type');
         if (!empty($callback)) {
-            return response(($callback . "('" . json_encode($jsonData) . "')"));
+            return response(($callback . "('" . json_encode($this->formatData($jsonData, $dataType)) . "')"));
         }
         
-        return response()->json($jsonData);
+        return response()->json($this->formatData($jsonData, $dataType));
+    }
+
+    public function formatData($arrData = [], $dataType = '')
+    {
+        if ($dataType == 'flatten') {
+            $arrData = $this->flatten($arrData);
+        }
+
+        return $arrData;
+    }
+
+    /**
+     * appendSourceKey 
+     *
+     * @param $item
+     * @param $key
+     *
+     * @return 
+     */
+    function appendSourceKey($item, $key = '')
+    {
+        if (empty($key)) {
+            return $item;
+        }
+
+        $data = [];
+        $data[array_get(config('modules_helper.response_format'), 'key', 'source_key')] = $key;
+        $data[array_get(config('modules_helper.response_format'), 'data', 'source_data')] = $item;
+
+        return $data;
+
+    }
+    function flatten($item, $topKey = '') {
+        // 特殊数值
+        if (!is_array($item) || empty($item) || count($item) == 0) {
+            return $this->appendSourceKey($item, $topKey);
+        }
+
+        $keys = array_keys($item);
+        // 索引正好等于当前数组的key
+        $newArr = [];
+        if ($keys == range(0, count($item) - 1) || !is_numeric(implode('', $keys))) {
+            foreach($item as $key => $value) {
+                //这里需要根据情况判断value是否要处理
+                $newItem = $this->flatten($value);
+                $newArr[$key] = $newItem;
+            }
+        } else {
+            //非数值型的Key
+            foreach($item as $key => $value) {
+                //这里需要根据情况判断value是否要处理
+                $newItem = $this->flatten($value, $key);
+                $newArr[] = $newItem;
+            }
+        }
+        return $this->appendSourceKey($newArr, $topKey);
     }
 
     /**

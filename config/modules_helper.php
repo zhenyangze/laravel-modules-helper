@@ -15,4 +15,9 @@ return [
         'data' => 'data',
         'message' => 'message',
     ],
+
+    'response_format' => [
+        'key' => 'source_key',
+        'data' => 'source_data',
+    ]
 ];
