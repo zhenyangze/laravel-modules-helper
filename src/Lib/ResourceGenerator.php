@@ -161,6 +161,11 @@ class ResourceGenerator
         return $output;
     }
 
+    /**
+     * generateShow 
+     *
+     * @return 
+     */
     public function generateShow()
     {
         $output = '';
@@ -179,6 +184,11 @@ class ResourceGenerator
         return $output;
     }
 
+    /**
+        * generateGrid 
+        *
+        * @return 
+     */
     public function generateGrid()
     {
         $output = '';
@@ -194,6 +204,11 @@ class ResourceGenerator
         return $output;
     }
 
+    /**
+        * getReservedColumns 
+        *
+        * @return 
+     */
     protected function getReservedColumns()
     {
         return [
@@ -250,5 +265,112 @@ class ResourceGenerator
     protected function formatLabel($value)
     {
         return ucfirst(str_replace(['-', '_'], ' ', $value));
+    }
+
+    /**
+     * generateHtmlHead 
+     *
+     * @return 
+     */
+    public function generateHtmlHead()
+    {
+        $maxKey = 5;
+        $columns = $this->getTableColumns();
+        $html = '';
+        foreach($columns as $column) {
+            if (!$maxKey--) {
+                break;
+            }
+            $html .= '<th scope="col">' . $column->getName() . '</th>' . "\n";
+        }
+        $html .= '<th scope="col">操作</th>' . "\n";
+        return $html;
+    }
+
+    /**
+     * generateHtmlList 
+     *
+     * @return 
+     */
+    public function generateHtmlList()
+    {
+        $maxKey = 5;
+        $columns = $this->getTableColumns();
+        $html = '';
+        foreach($columns as $column) {
+            if (!$maxKey--) {
+                break;
+            }
+            if (strtolower($column->getName()) == 'id') {
+                $html .= '<td scope="col"><a href="{{ route("DummyRouteShow", $item->' . $column->getName() . ') }}">{{ str_limit($item->' . $column->getName() . ', 25) }}</a></td>' . "\n";
+            } else {
+                $html .= '<td scope="col">{{ str_limit($item->' . $column->getName() . ', 25) }}</td>' . "\n";
+            }
+        }
+        $html .= '<td scope="col">
+            <form method="post" action="{{ route("DummyRouteDestroy", $item->id) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+                <a class="btn btn-info" href="{{ route("DummyRouteShow", $item->id) }}" role="button">查看</a>&nbsp;
+                <a class="btn btn-primary" href="{{ route("DummyRouteEdit", $item->id) }}" role="button">编辑</a>&nbsp;
+                <button type="submit" class="btn btn-danger">删除</button>
+            </form>
+            </td>' . "\n";
+        return $html;
+    }
+
+    /**
+     * generateHtmlView 
+     *
+     * @return 
+     */
+    public function generateHtmlView()
+    {
+        $columns = $this->getTableColumns();
+        $html = '';
+        foreach($columns as $column) {
+            $html .= "<h3>" . $column->getName() . "</h3>\n";
+            $html .= '<div class="well">{{ DummyModelClassName->' . $column->getName() . ' }}</div>' . "\n";
+        }
+        return $html;
+    }
+
+    /**
+     * generateHtmlForm 
+     *
+     * @return 
+     */
+    public function generateHtmlForm()
+    {
+        $columns = $this->getTableColumns();
+        $html = '';
+        foreach($columns as $column) {
+            $html .= '<div class="form-group">' . "\n";
+            $html .= '<label for="inputEmail3" class="col-sm-2 control-label">' . $column->getName() . '</label>' . "\n";
+            $html .= '<div class="col-sm-10">' . "\n";
+
+            $type = 'text';
+            switch($column->getType()->getName()) {
+                case 'integer':
+                case 'bigint':
+                case 'smallint':
+                case 'timestamp':
+                    $type = 'number';
+                    break;
+                case 'text':
+                case 'blob':
+                    $type = 'textarea';
+                    break;
+            }
+
+            if ($type != 'textarea') {
+                $html .= '<input type="' . $type . '" class="form-control" id="' . $column->getName() . '" name="' . $column->getName() . '" placeholder="' . $column->getName() . '" value="{{ array_get(DummyModelClassName, "' . $column->getName() . '") }}">' . "\n";
+            } else {
+                $html .= '<textarea class="form-control" rows="3" name="' . $column->getName() . '">{{ array_get(DummyModelClassName, "' . $column->getName() . '") }}</textarea>' . "\n";
+            }
+
+            $html .= '</div>' . "\n";
+            $html .= '</div>' . "\n";
+        }
+        return $html;
     }
 }

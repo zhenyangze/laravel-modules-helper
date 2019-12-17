@@ -1,7 +1,7 @@
 {
     "name": "yangze/laravel-modules-helper",
     "description": "some command help for caffeinated/modules",
-    "keywords": ["modules", "laravel", "helper", "api"],
+    "keywords": ["modules", "laravel", "helper", "api", "generators"],
     "license": "MIT",
     "authors": [
         {
@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "illuminate/support": "^5.5,<5.7",
+        "illuminate/support": "^5.5,<5.8",
         "caffeinated/modules": "*"
     },
     "autoload": {

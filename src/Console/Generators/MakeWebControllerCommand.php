@@ -4,14 +4,14 @@ namespace Yangze\ModulesHelper\Console\Generators;
 
 use Caffeinated\Modules\Console\GeneratorCommand;
 
-class MakeApiControllerCommand extends GeneratorCommand
+class MakeWebControllerCommand extends GeneratorCommand
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'make:module:helper:controller
+    protected $signature = 'make:module:helper:controller:web
     	{slug : The slug of the module}
     	{name : The name of the resource class}
     	{--model : Generate a module resource class}';
@@ -41,7 +41,7 @@ class MakeApiControllerCommand extends GeneratorCommand
             //return __DIR__.'/stubs/controller-api.stub';
         //}
 
-        return __DIR__.'/stubs/controller-api.stub';
+        return __DIR__.'/stubs/controller-web.stub';
     }
 
     /**
