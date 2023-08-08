@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Yangze\ModulesHelper;
 
@@ -7,7 +7,7 @@ use Yangze\ModulesHelper\Console\Providers\GeneratorServiceProvider;
 use Illuminate\Support\ServiceProvider;
 use Yangze\ModulesHelper\Lib\HttpCode;
 
-class ModulesHelperServiceProvider extends ServiceProvider 
+class ModulesHelperServiceProvider extends ServiceProvider
 {
     /**
      * @var bool Indicates if loading of the provider is deferred.
@@ -22,10 +22,9 @@ class ModulesHelperServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/../config/modules_helper.php' => config_path('modules_helper.php'),
+            __DIR__ . '/../config/modules_helper.php' => config_path('modules_helper.php'),
         ], 'config');
 
-        $this->initHttpCode();
     }
 
     /**
@@ -36,17 +35,10 @@ class ModulesHelperServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/modules_helper.php', 'modules_helper'
+            __DIR__ . '/../config/modules_helper.php',
+            'modules_helper'
         );
 
-        $this->app->register(ConsoleServiceProvider::class);
         $this->app->register(GeneratorServiceProvider::class);
-    }
-
-    public function initHttpCode()
-    {
-        foreach(config('modules_helper.http_code') as $identify => $code) {
-            HttpCode::code($identify, $code);
-        }
     }
 }

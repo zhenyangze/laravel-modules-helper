@@ -1,0 +1,19 @@
+<?php
+namespace DummyNamespace;
+
+class DummyClass
+{
+    // const XXXX = '';
+
+    public static function getValue($value)
+    {
+        switch ($value) {
+            case 'value':
+                # code...
+                break;
+            default:
+                return '';
+                break;
+        }
+    }
+}

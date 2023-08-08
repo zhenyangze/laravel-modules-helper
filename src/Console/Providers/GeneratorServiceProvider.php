@@ -20,8 +20,6 @@ class GeneratorServiceProvider extends ServiceProvider
     public function register()
     {
         $generators = [
-            'command.make.module.helper.resource' => \Yangze\ModulesHelper\Console\Generators\MakeResourceCommand::class,
-            'command.make.module.helper.request' => \Yangze\ModulesHelper\Console\Generators\MakeRequestCommand::class,
             'command.make.module.helper.controller' => \Yangze\ModulesHelper\Console\Generators\MakeControllerCommand::class,
         ];
 

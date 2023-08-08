@@ -10,9 +10,9 @@
         }
     ],
     "require": {
-        "php": ">=7.0.0",
-        "illuminate/support": "^5.5,<5.8",
-        "caffeinated/modules": "*"
+        "php": ">=7.3.0",
+        "laravel/framework": "^8.75",
+        "nwidart/laravel-modules": "*"
     },
     "autoload": {
         "psr-4": {

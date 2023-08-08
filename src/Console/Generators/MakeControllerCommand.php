@@ -2,104 +2,29 @@
 
 namespace Yangze\ModulesHelper\Console\Generators;
 
-use Caffeinated\Modules\Console\GeneratorCommand;
-use Yangze\ModulesHelper\Lib\ResourceGenerator;
 use Illuminate\Database\Eloquent\Model;
-use Artisan;
+use Illuminate\Console\Command;
 
-class MakeControllerCommand extends GeneratorCommand
+class MakeControllerCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'make:module:helper:controller
+    protected $signature = 'module:api
     	{slug : The slug of the module}
-    	{name : The name of the resource class}
-    	{--model= : Generate a module resource class}
-    	{--request : Generate a module request class}
-    	{--resource : Generate a module resource class}
-    	{--view : Generate a module view class}';
+    	{name : The name of the class}
+    	{--model= : the model class}';
+
+    protected $configList = [];
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new module Controller class';
-
-
-    protected $blackFields = ['id', 'created_at', 'updated_at', 'deleted_at'];
-    /**
-     * $generator 
-     */
-    protected $generator;
-    /**
-     * String to store the command type.
-     *
-     * @var string
-     */
-    protected $type = 'Module Controller';
-
-    /**
-     * Get the stub file for the generator.
-     *
-     * @return string
-     */
-    protected function getStub()
-    {
-        //if ($this->option('collection')) {
-            //return __DIR__.'/stubs/controller-api.stub';
-        //}
-
-        if ($this->option('view')) {
-            return __DIR__ . '/stubs/controller-web.stub';
-        }
-        return __DIR__ . '/stubs/controller-api.stub';
-    }
-
-    /**
-     * Get the default namespace for the class.
-     *
-     * @param string $rootNamespace
-     *
-     * @return string
-     */
-    protected function getDefaultNamespace($rootNamespace)
-    {
-        return module_class($this->argument('slug'), 'Http\\Controllers');
-    }
-    /**
-     * Get the default namespace for the class.
-     *
-     * @param string $rootNamespace
-     *
-     * @return string
-     */
-    protected function getRequestNamespace()
-    {
-        return module_class($this->argument('slug'), 'Http\\Requests');
-    }
-
-    /**
-     * Get the default namespace for the class.
-     *
-     * @param string $rootNamespace
-     *
-     * @return string
-     */
-    protected function getResourceNamespace()
-    {
-        return module_class($this->argument('slug'), 'Http\\Resources');
-    }
-
-    protected function getViewNamespace()
-    {
-        return module_class($this->argument('slug'), 'Resources\\Views');
-    }
-
-
+    protected $description = 'Create a new module Controller class with Request and Resource';
 
     public function handle()
     {
@@ -109,62 +34,51 @@ class MakeControllerCommand extends GeneratorCommand
             return false;
         }
         $modelName = $this->option('model');
-        if (!strstr($this->argument('name'), 'Controller')) {
-            $this->error('class need to suffix with Controller');
+
+        if (strstr($this->argument('name'), 'Controller')) {
+            $this->error('class no need to suffix with Controller');
             return false;
         }
 
-        $this->generator = new ResourceGenerator($modelName);
+        $this->configList = config('modules_helper.files');
+        $this->configList[] = [
+            'name'  => 'model',
+            'path'  => str_ireplace('\\', '/',  $this->option('model')),
+            'tag' => '',
+        ];
 
-        $this->generateFiles();
-
-        parent::handle();
-
-        if (!$this->option('view')) {
-            $this->info("\n\n添加成功，请手动添加路由:\n Route::resource('" . implode('/', [
-                $this->argument('slug'),
-                lcfirst($this->getBaseClassName()),
-            ]) . "', '" . str_replace("/", "\\", $this->getNameInput()) . "');");
-        } else {
-            $this->info("\n\n添加成功，请手动添加路由:");
-            $routerList = [
-                'index' => [
-                    'method' => 'get',
-                    'path' => '/',
-                ],
-                'show' => [
-                    'method' => 'get',
-                    'path' => '/{id}',
-                ],
-                'create' => [
-                    'method' => 'get',
-                    'path' => '/create',
-                ],
-                'edit' => [
-                    'method' => 'get',
-                    'path' => '/{id}/edit',
-                ],
-                'store' => [
-                    'method' => 'post',
-                    'path' => '/store',
-                ],
-                'update' => [
-                    'method' => 'post',
-                    'path' => '/{id}',
-                ],
-                'destroy' => [
-                    'method' => 'post',
-                    'path' => '/{id}/destroy',
-                ],
-            ];
-            foreach($routerList as $key => $route) {
-                $this->info("Route::" . $route['method'] . "('" . $route['path'] . "', '" . str_replace("/", "\\", $this->getNameInput()) . "@" . $key . "')->name('web." . implode('.', [
-                    $this->argument('slug'),
-                    lcfirst($this->getBaseClassName()),
-                    $key,
-                ]) . "')" . (stristr($route['path'], 'id') ? '->where("id", "[0-9]+");' : ';'));
+        // 生成文件
+        foreach ($this->configList as $stubInfo) {
+            $stub = $stubInfo['tag'];
+            $file = $stubInfo['path'];
+            if (empty($stub)) {
+                continue;
             }
+
+            $stubFile = __DIR__ . '/stubs/' . $stub . '.stub';
+            if (!file_exists($stubFile)) {
+                $this->info('Template File not exists: ' . $stubFile);
+                continue;
+            }
+            $newFile = $this->getNewFile($file);
+            if (file_exists(base_path($newFile))) {
+                $this->info('Generate File exists: ' . $newFile);
+                continue;
+            }
+            $stubContent = file_get_contents($stubFile);
+            $stubContent = $this->replaceClass($stubContent, $newFile);
+
+            // 如果目录不存在，先创建目录
+            if (!is_dir(dirname(base_path($newFile)))) {
+                mkdir(dirname(base_path($newFile)), 0777, true);
+            }
+            file_put_contents(base_path($newFile), $stubContent);
         }
+
+        $this->info("\n\n添加成功，请手动添加路由:\n Route::resource('" . implode('/', [
+            $this->argument('slug'),
+            lcfirst($this->getBaseClassName()),
+        ]) . "', '" . str_replace("/", "\\", $this->argument('name')) . "Controller');");
     }
 
     protected function getBaseClassName()
@@ -173,72 +87,7 @@ class MakeControllerCommand extends GeneratorCommand
             'Controller',
             'Request',
             'Resource'
-        ], '', class_basename($this->getNameInput()));
-    }
-
-    protected function generateFiles()
-    {
-        // 生成资源文件
-        if ($this->option('resource')) {
-            Artisan::call('make:module:helper:resource', [
-                'slug' => $this->argument('slug'),
-                'name' => $this->getTransferName('Resource'),
-            ]);
-            $this->info('Resource created successfully.');
-        }
-        if ($this->option('request')) {
-            $prefixList = [
-                'Create',
-                'Update',
-                'Delete',
-            ];
-            foreach($prefixList as $preStr) {
-                Artisan::call('make:module:helper:request', [
-                    'slug' => $this->argument('slug'),
-                    'name' => $this->getTransferName('Request', $preStr),
-                ]);
-            }
-            $this->info('Request created successfully.');
-        }
-
-        if ($this->option('view')) {
-            // 添加 viewcontroller
-            $viewList = [
-                'layout.blade',
-                'index.blade',
-                'show.blade',
-                'edit.blade',
-            ];
-            foreach($viewList as $view) {
-                $categoryName = str_ireplace('Controller', '', class_basename($this->getNameInput()));
-                $name = $this->qualifyClass($this->getViewNamespace(). '\\' . $categoryName . '\\' . $view);
-                $path = $this->getPath($name);
-                if (file_exists($path)) {
-                    $this->warn($name . " file already exists!");
-                    continue;
-                }
-                $this->makeDirectory($path);
-                $stub = $this->files->get(__DIR__ . '/stubs/views/' . $view);
-                $stub = str_replace([
-                    'ModelColumnsHead',
-                    'ModelColumnsList',
-                    'ModelColumnForm',
-                    'ModelColumnView',
-                ], [
-                    $this->generator->generateHtmlHead(),
-                    $this->generator->generateHtmlList(),
-                    $this->generator->generateHtmlForm(),
-                    $this->generator->generateHtmlView(),
-                ], $stub);
-                $routeList = ['index', 'show', 'create', 'edit', 'store', 'update', 'destroy'];
-                foreach($routeList as $route) {
-                    $stub = str_replace('DummyRoute' . ucfirst($route), 'web.' . $this->argument('slug') . '.' . lcfirst($this->getBaseClassName()) . '.' . $route, $stub);
-                }
-                $this->files->put($path, $this->replaceNamespace($stub, $name)->replaceClass($stub, $name));
-                $this->info($view .' created successfully.');
-            }
-            $this->info('View created successfully.');
-        }
+        ], '', class_basename($this->argument('name')));
     }
 
     /**
@@ -251,7 +100,7 @@ class MakeControllerCommand extends GeneratorCommand
         $model = $this->option('model');
 
         if (empty($model)) {
-            return true;
+            return false;
         }
 
         return class_exists($model) && is_subclass_of($model, Model::class);
@@ -261,122 +110,85 @@ class MakeControllerCommand extends GeneratorCommand
      * Replace the class name for the given stub.
      *
      * @param string $stub
-     * @param string $name
+     * @param string $newFile
      *
      * @return string
      */
-    protected function replaceClass($stub, $name)
+    protected function replaceClass($stub, $newFile)
     {
-        $stub = parent::replaceClass($stub, $name);
+        $className = str_replace('/', '\\', str_replace('.php', '', basename($newFile)));
+        $spaceName = str_replace('/', '\\', dirname($newFile));
 
         return str_replace(
             [
-                'DummyModuleName',
-
+                'DummyBaseControllerNameSpace',
+                'DummyBaseController',
+                'DummyNamespace',
+                'DummyClass',
                 'DummyModelNameSpace',
-                'DummyModelClassName', // 小写前缀$
-                'DummyModelClassVariable', // 小写前缀不带$
-                'DummyModelClass',
-
-                'DummyBaseClassName', //当前指定的 class 名称,小写
-                'DummyBaseClass', //当前指定的 class 名称
-
+                'DummyModelClassName',
                 'DummyResourceNameSpace',
                 'DummyResource',
-
-                'DummyCreateRequestNameSpace',
-                'DummyCreateRequest',
-
+                'DummyStoreRequestNameSpace',
+                'DummyStoreRequest',
                 'DummyUpdateRequestNameSpace',
                 'DummyUpdateRequest',
-
-                'DummyDeleteRequestNameSpace',
-                'DummyDeleteRequest',
-
-                'DummyFields',
+                'DummyDestoryRequestNameSpace',
+                'DummyDestroyRequest',
             ],
             [
-                $this->argument('slug'),
-                $this->option('model'),
-                '$' . lcfirst(class_basename($this->option('model'))),
-                lcfirst(class_basename($this->option('model'))),
-                class_basename($this->option('model')),
+                $this->getNamespaceOrClassName('base', 'namespace'),
+                $this->getNamespaceOrClassName('base', 'classname'),
+                $spaceName,
+                $className,
+                $this->getNamespaceOrClassName('model', 'namespace'),
+                $this->getNamespaceOrClassName('model', 'classname'),
 
-                lcfirst(str_replace([
-                    'Controller',
-                    'Request',
-                    'Resource'
-                ], '', class_basename($this->getNameInput()))),
-                str_replace([
-                    'Controller',
-                    'Request',
-                    'Resource'
-                ], '', class_basename($this->getNameInput())),
-
-                $this->getTransferNameSpace('Resource'),
-                class_basename($this->getTransferNameSpace('Resource')),
-
-                $this->getTransferNameSpace('Request', 'Create'),
-                class_basename($this->getTransferNameSpace('Request', 'Create')),
-
-                $this->getTransferNameSpace('Request', 'Update'),
-                class_basename($this->getTransferNameSpace('Request', 'Update')),
-                $this->getTransferNameSpace('Request', 'Delete'),
-                class_basename($this->getTransferNameSpace('Request', 'Delete')),
-
-                $this->generateFillField(),
+                $this->getNamespaceOrClassName('resource', 'namespace'),
+                $this->getNamespaceOrClassName('resource', 'classname'),
+                $this->getNamespaceOrClassName('store', 'namespace'),
+                $this->getNamespaceOrClassName('store', 'classname'),
+                $this->getNamespaceOrClassName('update', 'namespace'),
+                $this->getNamespaceOrClassName('update', 'classname'),
+                $this->getNamespaceOrClassName('destory', 'namespace'),
+                $this->getNamespaceOrClassName('destory', 'classname'),
             ],
             $stub
         );
     }
 
-    /**
-     * getTransferName 
-     *
-     * @param $type
-     * @param $preStr
-     *
-     * @return 
-     */
-    protected function getTransferName($type, $preStr = '')
+    protected function getNewFile($file)
     {
-        $name = $this->argument('name');
-        return str_replace('Controller', $preStr . $type, $name);
+        return str_ireplace([
+            '{{module}}',
+            '{{class}}'
+        ], [
+            $this->argument('slug'),
+            $this->argument('name'),
+        ], $file);
     }
 
-    /**
-     * getTransferNameSpace 
-     *
-     * @param $type
-     * @param $preStr
-     *
-     * @return 
-     */
-    protected function getTransferNameSpace($type, $preStr = '') {
-        $newName = $this->getTransferName($type, $preStr);
-        $method = 'get' . $type . 'Namespace';
-        $newsNameSpace = $this->$method() . '\\' . $newName;
-        $newsNameSpace = str_replace('/', '\\', $newsNameSpace);
-
-        return $newsNameSpace;
-    }
-
-    /**
-     * generateFillField 
-     *
-     * @return 
-     */
-    protected function generateFillField()
+    function getNamespaceOrClassName($name, $getType)
     {
-        $fields = [];
-        foreach($this->generator->getTableColumns() as $column) {
-            $columnName = $column->getName();
-            if (in_array($columnName, $this->blackFields)) {
-                continue;
+        $path = '';
+        foreach ($this->configList as $item) {
+            if ($item['name'] == $name) {
+                $path = $item['path'];
+                break;
             }
-            $fields[] = '\'' . $columnName . '\'';
         }
 
-        return '[' . implode(',', $fields) . ']';
+        $path = str_replace('{{module}}', $this->argument('slug'), $path);
+        $path = str_replace('{{class}}', $this->argument('name'), $path);
+
+        $pathParts = pathinfo($path);
+        $filename = $pathParts['filename'];
+
+        if ($getType == 'namespace') {
+            $namespace = str_replace('/', '\\', $pathParts['dirname']) . '\\' . $filename;
+            return $namespace;
+        } else if ($getType == 'classname') {
+            return $filename;
+        }
     }
 }

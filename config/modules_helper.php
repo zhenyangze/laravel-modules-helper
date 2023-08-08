@@ -1,23 +1,13 @@
-<?php 
+<?php
 
 return [
-    'http_code' => [
-        'success' => 200,
-        'bad request' => 400,
-        'unauthorized' => 401,
-        'not found' => 404,
-        'fail validate' => 422,
-        'error' => 500,
-    ],
-
-    'http_key' => [
-        'code' => 'code',
-        'data' => 'data',
-        'message' => 'message',
-    ],
-
-    'response_format' => [
-        'key' => 'source_key',
-        'data' => 'source_data',
+    'files'  => [
+        ['name'  => 'base', 'path'  => 'App/Http/Controllers/ApiController.php', 'tag'  => ''],
+        ['name' => 'enum', 'path' => 'Modules/{{module}}/Enums/{{class}}Enum.php', 'tag' => 'Enum'],
+        ['name' => 'controller', 'path' => 'Modules/{{module}}/Http/Controllers/{{class}}Controller.php', 'tag' => 'Controller'],
+        ['name'  =>  'resource', 'path' => 'Modules/{{module}}/Transformers/{{class}}Resource.php', 'tag' => 'Resource'],
+        ['name'  =>  'store', 'path' => 'Modules/{{module}}/Http/Requests/{{class}}StoreRequest.php', 'tag' => 'Request'],
+        ['name'  =>  'update', 'path' => 'Modules/{{module}}/Http/Requests/{{class}}UpdateRequest.php', 'tag' => 'Request'],
+        ['name'  =>  'destory', 'path' => 'Modules/{{module}}/Http/Requests/{{class}}DestroyRequest.php', 'tag' => 'Request'],
     ]
 ];

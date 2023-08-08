@@ -1,5 +1,5 @@
 # laravel modules helper
-this is a package for creating restful api with `Caffeinated Modules`, the first version is aim to ***create restful api*** in modules.
+this is a package for creating restful api with `nwidart/laravel-modules`, the first version is aim to ***create restful api*** in modules.
 
 ## Quick Installation
 Begin by installing the package through Composer.
@@ -18,11 +18,10 @@ Yangze\ModulesHelper\ModulesHelperServiceProvider::class,
 php artisan vendor:publish --tag Yangze\ModulesHelper\ModulesHelperServiceProvider
 ```
 ## Command list
-| command | description | args |
-|:--------|:--------|:--------|
-|    make:module:helper:controller    |   Create a new module Controller class     | --model, --request, --resource |
-| make:module:helper:request | Create a new module form request class for api | |
-| make:module:helper:resource | Create a new module resource class ||
+| command    | description                          | args    |
+|:-----------|:-------------------------------------|:--------|
+| module:api | Create a new module Controller class | --model |
+
 
 ## Usage
 1. create modules, such as Common
@@ -34,22 +33,22 @@ php artisan make:module Common
 
 before you create the api, you shoule make sure the model is exists.
 ```php
-php artisan make:module:helper:controller common Api/CommonNewsController --model App\\Models\\CommonNews --resource --request
+php artisan module:api common Api/CommonNewsController --model App\\Models\\CommonNews
 ```
 
 3. add route to the `api.php`
 
 in my website is app/Modules/Common/Routes/api.php,you should choose the right module.
 ```php
-Route::resource('common/news', 'Api\CommonNewsController');
+Route::resource('common/news', 'CommonNewsController');
 ```
 
 4. test the restful api
 
-| method | url |
-|:--------|:--------|
-|     get   |    api/common/news   |
-|     post  |    api/common/news   |
-|     get   |    api/common/news/1   |
-|     patch |    api/common/news/1   |
-|    delete |    api/common/news/1   |
+| method | url               | comment |
+|:-------|:------------------|---------|
+| get    | api/common/news   |         |
+| post   | api/common/news   | form    |
+| get    | api/common/news/1 |         |
+| put    | api/common/news/1 | raw     |
+| delete | api/common/news/1 |         |

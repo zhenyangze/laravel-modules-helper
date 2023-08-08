@@ -1,0 +1,72 @@
+<?php
+
+namespace DummyNamespace;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Routing\Controller;
+use DummyStoreRequestNameSpace;
+use DummyUpdateRequestNameSpace;
+use DummyDestoryRequestNameSpace;
+use DummyResourceNameSpace;
+use DummyModelNameSpace;
+use DummyBaseControllerNameSpace;
+
+class DummyClass extends DummyBaseController
+{
+    /**
+     * Display a listing of the resource.
+     * @return Response
+     */
+    public function index()
+    {
+        return $this->success(DummyResource::collection(DummyModelClassName::paginate()));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     * @param Request $request
+     * @return Response
+     */
+    public function store(DummyStoreRequest $request)
+    {
+        $ret = DummyModelClassName::create($request->all());
+        if ($ret) {
+            return $this->success($ret);
+        } else {
+            return $this->failed('创建失败');
+        }
+    }
+
+    /**
+     * Show the specified resource.
+     * @param int $id
+     * @return Response
+     */
+    public function show($id)
+    {
+        return $this->success(new DummyResource(DummyModelClassName::findOrFail($id)));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     */
+    public function update(DummyUpdateRequest $request, $id)
+    {
+        $model = DummyModelClassName::findOrFail($id);
+        return $this->success($model->update($request->all()));
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     * @param int $id
+     * @return Response
+     */
+    public function destroy(DummyDestroyRequest $request, $id)
+    {
+        return $this->success(DummyModelClassName::destroy($id));
+    }
+}
